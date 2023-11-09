@@ -1,9 +1,15 @@
-FROM vernemq/vernemq
+FROM vernemq/vernemq AS vernemq-builder
 
 COPY vernemq.conf /etc/vernemq/vernemq.conf
 
-# COPY certificates/ /etc/vernemq/certificates/
-
-EXPOSE 1883
-
 CMD ["start_vernemq"]
+
+FROM nginx:alpine
+
+COPY --from=vernemq-builder /etc/vernemq/vernemq.conf /etc/vernemq/vernemq.conf
+
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+EXPOSE 443
+
+CMD ["nginx", "-g", "daemon off;"]
